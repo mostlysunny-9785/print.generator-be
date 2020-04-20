@@ -1,4 +1,4 @@
-import {ImageModel} from "./image.model";
+import {ImageModel} from "../model/image.model";
 import {Observable} from "rxjs";
 
 const Arena = require("are.na");
@@ -23,7 +23,8 @@ export class ArenaClass {
                                 localPath: '',
                                 remotePath: block.image.original.url,
                                 fileSize: block.image.original.file_size,
-                                filename: path.basename(url.parse(block.image.original.url).pathname)
+                                filename: path.basename(url.parse(block.image.original.url).pathname),
+                                chanelUrl: chanel
                             });
                         }
                     });

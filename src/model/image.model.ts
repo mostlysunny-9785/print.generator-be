@@ -7,5 +7,5 @@ export interface ImageModel {
     created: Date,
     filename: string,
     fileSize: number,
-
+    chanelUrl: string
 }
