@@ -2,6 +2,9 @@ import {Application, Request, Response, Router} from "express";
 import {ScrapController} from "./scrap.controller";
 import {DB} from "../db/db";
 import express = require("express");
+import {ChannelsController} from "./channels.controller";
+import {ImagesController} from "./images.controller";
+import {UsersController} from "./users.controller";
 
 
 export class RoutesClass {
@@ -18,16 +21,19 @@ export class RoutesClass {
         });
 
         router.post('/scrap', ScrapController.post);
-        router.get('/chanels', (req: Request, res: Response) => {res.send(DB.getChanel());});
-        router.delete('/chanels', (req: Request, res: Response) => {DB.removeChanel(req.params.chanel)});
+        router.get('/channels', ChannelsController.get);
+        router.delete('/channels', ChannelsController.delete);
 
-
-
-        router.get('/images', (req: Request, res: Response) => {
-            res.send(DB.getImages());
-        });
-
+        router.get('/images', ImagesController.get);
+        router.delete('/images/:id', ImagesController.delete);
         router.use('/imagefiles', express.static('images/'));
+
+        router.get('/users', UsersController.list);
+        router.get('/user/:id', UsersController.get);
+        router.post('/user', UsersController.create);
+        router.put('/user', UsersController.update);
+
+
         app.use("/api", router);
     }
 }
