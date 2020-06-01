@@ -1,0 +1,13 @@
+#!/bin/bash
+
+NAME=mongoYacyag
+
+docker stop $NAME
+docker rm $NAME
+
+docker run \
+      --name $NAME \
+      -d  \
+      -p 27018:27017 \
+      -v $PWD/mongoData:/data/db \
+      mongo

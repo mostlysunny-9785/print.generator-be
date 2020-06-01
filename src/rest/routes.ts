@@ -5,6 +5,7 @@ import express = require("express");
 import {ChannelsController} from "./channels.controller";
 import {ImagesController} from "./images.controller";
 import {UsersController} from "./users.controller";
+import {Passport} from "../config/passport";
 
 
 export class RoutesClass {
@@ -17,21 +18,25 @@ export class RoutesClass {
 
 
         router.get('/', (req: Request, res: Response) => {
-            res.send('hello there');
+            res.send('hello there stranger');
         });
 
-        router.post('/scrap', ScrapController.post);
-        router.get('/channels', ChannelsController.get);
-        router.delete('/channels', ChannelsController.delete);
+        router.post('/scrap', Passport.isAuthenticated, ScrapController.post);
+        router.get('/channels', Passport.isAuthenticated, ChannelsController.get);
+        router.delete('/channels', Passport.isAuthenticated, ChannelsController.delete);
 
-        router.get('/images', ImagesController.get);
-        router.delete('/images/:id', ImagesController.delete);
-        router.use('/imagefiles', express.static('images/'));
+        router.get('/images', Passport.isAuthenticated, ImagesController.get);
+        router.delete('/images/:id', Passport.isAuthenticated, ImagesController.delete);
+        router.use('/imagefiles', Passport.isAuthenticated, express.static('images/'));
 
-        router.get('/users', UsersController.list);
-        router.get('/user/:id', UsersController.get);
-        router.post('/user', UsersController.create);
-        router.put('/user', UsersController.update);
+        router.get('/users', Passport.isAuthenticated, UsersController.list);
+        router.get('/user/:id', Passport.isAuthenticated, UsersController.get);
+        router.post('/user', Passport.isAuthenticated, UsersController.create);
+        router.put('/user', Passport.isAuthenticated, UsersController.update);
+
+        router.post('/login', UsersController.postLogin);
+        router.get('/session', Passport.isAuthenticated, UsersController.session);
+        router.get('/logout',Passport.isAuthenticated, UsersController.logout);
 
 
         app.use("/api", router);

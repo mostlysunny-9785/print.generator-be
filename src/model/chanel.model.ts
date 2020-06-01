@@ -1,3 +1,6 @@
 export interface ChanelModel {
-    url: string
+
+    userId: string,
+    url: string,
+
 }

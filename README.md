@@ -1,5 +1,10 @@
 # Node TypeScript Starter
 
+https://github.com/microsoft/TypeScript-Node-Starter/
+  - need to update bcrypt
+  - tweak bcrypt
+  - change serializeUser to not accept false as answer
+
 ## Getting started
 
 1. Clone this repository and open it
