@@ -83,7 +83,12 @@ export class AppClass {
     }
 
     initMongo() {
-        mongoose.connect(this.mongoUrl, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true } ).then(
+        mongoose.connect(this.mongoUrl, {
+            useNewUrlParser: true,
+            useCreateIndex: true,
+            useUnifiedTopology: true,
+            useFindAndModify: false
+        } ).then(
             () => {
                 logger.info("MongoDB connected");
                 /** ready to use. The `mongoose.connect()` promise resolves to undefined. */ },

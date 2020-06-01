@@ -2,8 +2,8 @@ import {NextFunction, Request, Response} from "express";
 import {DB} from "../db/db";
 import { check, sanitize, validationResult } from "express-validator";
 import passport from "passport";
-import {UserModel} from "../model/user.model";
 import {IVerifyOptions} from "passport-local";
+import {UserDocument} from "../model/User";
 
 export class UsersControllerClass {
     public async session(req: Request, res: Response, next: NextFunction) {
@@ -27,7 +27,7 @@ export class UsersControllerClass {
             return;
         }
 
-        passport.authenticate("local", (err: Error, user: UserModel, info: IVerifyOptions) => {
+        passport.authenticate("local", (err: Error, user: UserDocument, info: IVerifyOptions) => {
             if (err) {
                 return next(err);
             }

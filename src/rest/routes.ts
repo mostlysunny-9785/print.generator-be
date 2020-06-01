@@ -23,9 +23,10 @@ export class RoutesClass {
 
         router.post('/scrap', Passport.isAuthenticated, ScrapController.post);
         router.get('/channels', Passport.isAuthenticated, ChannelsController.get);
-        router.delete('/channels', Passport.isAuthenticated, ChannelsController.delete);
+        router.delete('/channels/:chanelId', Passport.isAuthenticated, ChannelsController.delete);
 
         router.get('/images', Passport.isAuthenticated, ImagesController.get);
+        router.get('/images/:chanelId', Passport.isAuthenticated, ImagesController.getByChanel);
         router.delete('/images/:id', Passport.isAuthenticated, ImagesController.delete);
         router.use('/imagefiles', Passport.isAuthenticated, express.static('images/'));
 
