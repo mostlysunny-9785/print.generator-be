@@ -1,7 +1,7 @@
 import {Application, Request, Response, Router} from "express";
 import {ScrapController} from "./scrap.controller";
 import {DB} from "../db/db";
-import express = require("express");
+import express from "express";
 import {ChannelsController} from "./channels.controller";
 import {ImagesController} from "./images.controller";
 import {UsersController} from "./users.controller";

@@ -1,4 +1,4 @@
-import express = require("express");
+import express from "express";
 import {Routes} from "./rest/routes";
 import {Passport} from "./config/passport";
 import passport from "passport";
@@ -17,7 +17,7 @@ const cors = require('cors')
 
 export class AppClass {
     public app: express.Application;
-    private mongoUrl = MONGODB_URI ?? "mongodb://localhost:27018/yacyag";
+    private mongoUrl: any = MONGODB_URI ?? "mongodb://localhost:27018/yacyag";
 
 
     constructor() {
@@ -83,6 +83,7 @@ export class AppClass {
     }
 
     initMongo() {
+        logger.info("Connecting to MongoDB on " + this.mongoUrl);
         mongoose.connect(this.mongoUrl, {
             useNewUrlParser: true,
             useCreateIndex: true,

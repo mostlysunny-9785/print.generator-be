@@ -1,5 +1,5 @@
 {
-  "name": "yacya",
+  "name": "yacyag",
   "version": "1.0.0",
   "main": "index.js",
   "author": "Horus Lugo",
@@ -27,6 +27,8 @@
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.8.4",
     "@babel/node": "^7.8.4",
+    "@babel/plugin-proposal-class-properties": "^7.10.4",
+    "@babel/plugin-transform-runtime": "^7.10.5",
     "@babel/preset-env": "^7.8.4",
     "@babel/preset-typescript": "^7.8.3",
     "@babel/register": "^7.8.3",
@@ -48,6 +50,7 @@
     "node": ">=12"
   },
   "dependencies": {
+    "@babel/runtime": "^7.10.5",
     "@types/bcrypt": "^3.0.0",
     "@types/bluebird": "^3.5.31",
     "@types/connect-mongo": "^3.1.3",
