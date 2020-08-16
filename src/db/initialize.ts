@@ -2,6 +2,7 @@ import {User, UserDocument} from "../model/User";
 import logger from "../util/logger";
 import {Chanel, ChanelDocument, ChanelTypes} from "../model/chanel.model";
 import {Image, ImageDocument} from "../model/image.model";
+import bcrypt from "bcrypt";
 
 
 class DbInitializedClass {
@@ -13,7 +14,11 @@ class DbInitializedClass {
         } as UserDocument, {
             email: "kuba",
             password: "$2b$10$opt8/gzBpfJa.7Lj3i1Gp.LynoNrZTCBsltHbtUxqT.DF1xNIW8i2"
-        } as UserDocument], (error: Error, docsInserted: UserDocument[]) => {
+        } as UserDocument, {
+            email: "nobody #10156",
+            password: "$2b$10$ZGR13jlz8A9.ylr2inJdYu7yduc7w5q7eGPzsewAAdBjcSYEjEsNO"
+        } as UserDocument
+        ], (error: Error, docsInserted: UserDocument[]) => {
             if (error){
                 logger.error(error);
             } else {
@@ -54,6 +59,18 @@ class DbInitializedClass {
         //         ownerId
         //     } as ChanelDocument
         // ])
+
+
+
+        // script for generating hash
+        bcrypt.genSalt(10, (err, salt) => {
+            if (err) { return ; }
+            bcrypt.hash("dummy", salt, (err: Error, hash: any) => {
+                if (err) { return; }
+                logger.info("Generated hash is: " + hash)
+            });
+        });
+
     }
 
 }

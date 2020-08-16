@@ -16,7 +16,7 @@ export class UsersControllerClass {
 
     public async postLogin(req: Request, res: Response, next: NextFunction) {
         await check("email", "Email cannot be blank").isLength({min: 1}).run(req);
-        await check("password", "Password cannot be blank").isLength({min: 1}).run(req);
+        // await check("password", "Password cannot be blank").isLength({min: 0}).run(req);
 
         const errors = validationResult(req);
         let body = req.body;
