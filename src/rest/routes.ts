@@ -6,6 +6,7 @@ import {ChannelsController} from "./channels.controller";
 import {ImagesController} from "./images.controller";
 import {UsersController} from "./users.controller";
 import {Passport} from "../config/passport";
+import multer from "multer";
 
 
 export class RoutesClass {
@@ -25,9 +26,13 @@ export class RoutesClass {
         router.get('/channels', Passport.isAuthenticated, ChannelsController.get);
         router.delete('/channels/:chanelId', Passport.isAuthenticated, ChannelsController.delete);
 
+
+        var upload = multer({dest: "images"});
+        router.post('/images/:folderId', Passport.isAuthenticated, upload.array('data'), ImagesController.post);
         router.get('/images', Passport.isAuthenticated, ImagesController.get);
-        router.get('/images/:chanelId', Passport.isAuthenticated, ImagesController.getByChanel);
-        router.delete('/images/:id', Passport.isAuthenticated, ImagesController.delete);
+        router.get('/arenaimages/:chanelId', Passport.isAuthenticated, ImagesController.getByChanel);
+        router.get('/images/:folderId', Passport.isAuthenticated, ImagesController.getByFolder);
+        router.delete('/images/:id/:folderId', Passport.isAuthenticated, ImagesController.delete);
         router.use('/imagefiles', Passport.isAuthenticated, express.static('images/'));
 
         router.get('/users', Passport.isAuthenticated, UsersController.list);

@@ -10,7 +10,7 @@ export const DefaultResponseHandler = <T>(error: Error, payload: T, res: Respons
 
 export const DefaultSimpleResponseHandler = (error: Error, res: Response) => {
     if (error) {
-        res.status(400).send(error);
+        res.status(400).json(error);
     } else {
         res.status(200).json({response: "ok"});
     }

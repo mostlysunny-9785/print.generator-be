@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 import {ChanelDocument} from "./chanel.model";
 
+export enum ImageTypes {
+    ARENA,
+    WWW,
+    FILE
+}
 
 export type ImageDocument = mongoose.Document & {
     localPath: string;
@@ -12,6 +17,8 @@ export type ImageDocument = mongoose.Document & {
     filename: string;
     fileSize: number;
     chanelId: string;
+    folderId: string;
+    imageType: ImageTypes;
     ownerId: string,
 }
 
@@ -26,6 +33,8 @@ const imageSchema = new mongoose.Schema({
     filename: String,
     fileSize: Number,
     chanelId: String,
+    folderId: String,
+    imageType: String,
     ownerId: String,
 }, {timestamps: true})
 

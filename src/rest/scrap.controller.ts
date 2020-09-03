@@ -11,10 +11,10 @@ export class ScrapControllerClass {
 
     public async post(req: Request, res: Response) {
         let userId = (req.user as UserDocument)._id;
-        if (req.body.chanel) {
+        if (req.body.channel) {
             // let scrap1 = await this.scrap.bind(req.body.chanel, res, userId);
             // let promise = await this.scrap(req.body.chanel, res, userId);
-            let promise = await ScrapController.scrap(req.body.chanel, res, userId);
+            let promise = await ScrapController.scrap(req.body.channel, req.body.folderId, res, userId);
             // cant use this directly because of bidning problem :/
             // https://stackoverflow.com/questions/3127429/how-does-the-this-keyword-work
         } else {
@@ -22,15 +22,16 @@ export class ScrapControllerClass {
         }
     }
 
-    public async scrap(chanelToLoad: string, res: Response, userId: string) {
-        let channel: ChanelDocument | null = await Chanel.findOne({url: chanelToLoad, ownerId: userId});
+    public async scrap(channelToLoad: string, folderId: string, res: Response, userId: string) {
+        let channel: ChanelDocument | null = await Chanel.findOne({url: channelToLoad, ownerId: userId});
 
         if (channel) {
             logger.info("Reloading channel");
         } else {
             channel = new Chanel({
                 ownerId: userId,
-                url: chanelToLoad,
+                folderId,
+                url: channelToLoad,
                 type: ChanelTypes.WWW,
                 pictureIds: []
             });
@@ -39,7 +40,7 @@ export class ScrapControllerClass {
             channel._id = promise._id;
         }
 
-        ArenaScrapper.scrapImages(chanelToLoad, 1, 1000, channel._id).subscribe((value: ImageDocument[]) => {
+        ArenaScrapper.scrapImages(channelToLoad, 1, 1000, channel._id).subscribe((imageDocument: ImageDocument[]) => {
             // console.log({value});
             var newImages: ImageDocument[] = [];
             var stats = {
@@ -48,33 +49,35 @@ export class ScrapControllerClass {
                 overallDownload: newImages.length
             };
 
-            value.forEach(image => {
+
+            imageDocument.forEach(image => {
                 var newImagePath = 'images/' + image.filename;
+                image.folderId = folderId; // set folder in which was image scrapped for
                 if (!fs.existsSync(newImagePath)){ // only if we do not have that image physically
                     download_image(image.remotePath, newImagePath).then((value:any) => {
                         stats.downloadedImages++;
                         image.localPath = newImagePath;
                         if (channel) {
-                            this.appendImage(image, channel, stats, userId);
+                            this.appendImage(image, folderId, channel, stats, userId);
 
                         }
                     });
                 } else { // we already have that image
                     if (channel) {
-                        this.appendImage(image, channel, stats, userId);
+                        this.appendImage(image, folderId, channel, stats, userId);
                     }
                 }
             });
 
-            res.send(newImages.length + ' images scrapped, loaded ' + value.length + " blocks");
+            res.send(newImages.length + ' images scrapped, loaded ' + imageDocument.length + " blocks");
             logger.info("Scrap result", stats);
 
         });
     };
 
-    public async appendImage(image: ImageDocument, channel: ChanelDocument, stats: any, ownerId: string) {
+    public async appendImage(image: ImageDocument, folderId: string, channel: ChanelDocument, stats: any, ownerId: string) {
         // if we cant find that image add it (upsert)
-        Image.findOneAndUpdate({remotePath: image.remotePath, ownerId}, image, {upsert: true}, (err, image: ImageDocument | null, res: any) => {
+        Image.findOneAndUpdate({remotePath: image.remotePath, ownerId, folderId}, image, {upsert: true}, (err, image: ImageDocument | null, res: any) => {
             if (err) {
                 logger.error(err);
             } else if (image) {
@@ -90,6 +93,7 @@ export class ScrapControllerClass {
         });
 
     }
+
 }
 
 export var ScrapController = new ScrapControllerClass();
