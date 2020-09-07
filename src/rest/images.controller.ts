@@ -14,7 +14,10 @@ export class ImagesControllerClass {
     getByFolder(req: Request, res: Response) {
         let user = (req.user as UserDocument)._id;
         let folderId = req.params.folderId;
-        Image.find({ownerId: user, folderId}, (error, images: ImageDocument[]) => DefaultResponseHandler(error, images, res));
+        Image.find({ownerId: user, folderId})
+            .sort({createdAt: -1})
+            .exec( (error, images: ImageDocument[]) => DefaultResponseHandler(error, images, res));
+
     }
 
     delete(req: Request, res: Response){
