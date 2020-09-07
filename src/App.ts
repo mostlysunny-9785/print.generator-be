@@ -9,6 +9,7 @@ import {mongo} from "mongoose";
 import bluebird from "bluebird";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
+import bodyParser from "body-parser";
 import {DbInitialized} from "./db/initialize";
 import bcrypt from "bcrypt";
 const MongoStore = require('connect-mongo')(session);
@@ -37,7 +38,7 @@ export class AppClass {
     }
 
     initExpress() {
-        this.app.use(cors());
+        // this.app.use(cors());
         this.app.use(express.json()) // for parsing application/json
         this.app.use(cookieParser());
         this.app.use(session({

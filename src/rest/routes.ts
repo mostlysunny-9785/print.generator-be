@@ -7,6 +7,8 @@ import {ImagesController} from "./images.controller";
 import {UsersController} from "./users.controller";
 import {Passport} from "../config/passport";
 import multer from "multer";
+import {WordsController} from "./words.controller";
+import bodyParser from "body-parser";
 
 
 export class RoutesClass {
@@ -28,12 +30,19 @@ export class RoutesClass {
 
 
         var upload = multer({dest: "images"});
+        // var jsonParser = bodyParser.json()
         router.post('/images/:folderId', Passport.isAuthenticated, upload.array('data'), ImagesController.post);
         router.get('/images', Passport.isAuthenticated, ImagesController.get);
         router.get('/arenaimages/:chanelId', Passport.isAuthenticated, ImagesController.getByChanel);
         router.get('/images/:folderId', Passport.isAuthenticated, ImagesController.getByFolder);
         router.delete('/images/:id/:folderId', Passport.isAuthenticated, ImagesController.delete);
         router.use('/imagefiles', Passport.isAuthenticated, express.static('images/'));
+
+
+        router.get('/words/:folderId', Passport.isAuthenticated, WordsController.get);
+        router.post('/words/:folderId', Passport.isAuthenticated, WordsController.add);
+        router.put('/words/:wordId', Passport.isAuthenticated, WordsController.update);
+        router.delete('/words/:wordId', Passport.isAuthenticated, WordsController.delete);
 
         router.get('/users', Passport.isAuthenticated, UsersController.list);
         router.get('/user/:id', Passport.isAuthenticated, UsersController.get);
