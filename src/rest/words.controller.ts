@@ -50,7 +50,7 @@ export class WordsControllerClass {
     delete(req: Request, res: Response){
         let ownerId = (req.user as UserDocument)._id;
         let _id = req.params.wordId;
-        Word.remove({_id, ownerId}, (err) => DefaultSimpleResponseHandler(err, res));
+        Word.deleteOne({_id, ownerId}, (err) => DefaultSimpleResponseHandler(err, res));
     }
 
     get(req: Request, res: Response){

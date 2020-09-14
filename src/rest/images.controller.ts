@@ -24,7 +24,7 @@ export class ImagesControllerClass {
         let ownerId = (req.user as UserDocument)._id;
         let _id = req.params.id;
         let folderId = req.params.folderId;
-        Image.remove({folderId, _id, ownerId}, (err) => DefaultSimpleResponseHandler(err, res));
+        Image.deleteOne({folderId, _id, ownerId}, (err) => DefaultSimpleResponseHandler(err, res));
     }
 
 

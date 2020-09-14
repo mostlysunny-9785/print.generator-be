@@ -8,7 +8,7 @@ import {UsersController} from "./users.controller";
 import {Passport} from "../config/passport";
 import multer from "multer";
 import {WordsController} from "./words.controller";
-import bodyParser from "body-parser";
+import {FoldersController} from "./folders.controller";
 
 
 export class RoutesClass {
@@ -28,6 +28,10 @@ export class RoutesClass {
         router.get('/channels', Passport.isAuthenticated, ChannelsController.get);
         router.delete('/channels/:chanelId', Passport.isAuthenticated, ChannelsController.delete);
 
+
+        router.get('/folders', Passport.isAuthenticated, FoldersController.get);
+        router.post('/folders', Passport.isAuthenticated, FoldersController.add);
+        router.delete('/folders/:folderId', Passport.isAuthenticated, FoldersController.delete);
 
         var upload = multer({dest: "images"});
         // var jsonParser = bodyParser.json()
