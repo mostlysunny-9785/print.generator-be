@@ -65,6 +65,17 @@ export class WordsControllerClass {
             }
         });
     }
+
+    getAll(req: Request, res: Response){
+        let ownerId = (req.user as UserDocument)._id;
+        Word.findOne({ownerId}, (err, word) => {
+            if (err || !word) {
+                DefaultSimpleResponseHandler(new Error('Cant find any images'), res);
+            } else {
+                res.status(200).json(word);
+            }
+        });
+    }
 }
 
 export var WordsController = new WordsControllerClass();

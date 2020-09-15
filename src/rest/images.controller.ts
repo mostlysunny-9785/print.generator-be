@@ -114,8 +114,9 @@ export class ImagesControllerClass {
 
 
     get(req: Request, res: Response){
-
-        // res.send(DB.getImages());
+        let user = (req.user as UserDocument)._id;
+        Image.find({ownerId: user})
+            .exec( (error, images: ImageDocument[]) => DefaultResponseHandler(error, images, res));
     }
 }
 

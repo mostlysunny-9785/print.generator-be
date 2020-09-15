@@ -1,10 +1,9 @@
 import {Request, Response} from "express";
-import {Image, ImageDocument, ImageTypes} from "../model/image.model";
 import {DefaultResponseHandler, DefaultSimpleResponseHandler} from "./default.controller";
 import {UserDocument} from "../model/User";
-import * as fs from "fs";
 import logger from "../util/logger";
 import {Folder, FolderDocument, FolderType} from "../model/folder.model";
+import {Image} from "../model/image.model";
 import {Word} from "../model/word.model";
 
 export class FoldersControllerClass {
@@ -50,7 +49,49 @@ export class FoldersControllerClass {
     delete(req: Request, res: Response){
         let ownerId = (req.user as UserDocument)._id;
         let _id = req.params.folderId;
-        Folder.deleteOne({_id, ownerId}, (err) => DefaultSimpleResponseHandler(err, res));
+        // find folder contents and delete them
+        Folder.findOne({_id, ownerId}, (err, folder: FolderDocument) => {
+            if (err) {
+                logger.error('Cant find folder.');
+                DefaultSimpleResponseHandler(new Error('Cant find folder'), res);
+            } else {
+                // ten delete also folder content
+                const promise = new Promise((resolve, reject) => {
+                    if (folder.type.toString() === FolderType.WORD.toString()) {
+                        Word.deleteMany({ownerId, folderId: folder.id}, (err) => {
+                            if (err) {
+                                logger.error('Error during removal .' + err.message);
+                                reject(err);
+                            } else {
+                                resolve();
+                            }
+
+                        });
+                    } else if (folder.type.toString() === FolderType.IMAGE.toString()) {
+                        Image.deleteMany({ownerId, folderId: folder.id}, (err) => {
+                            if (err) {
+                                logger.error('Error during image removal .' + err.message);
+                                reject(err);
+                            } else {
+                                resolve();
+                            }
+                        });
+                    }
+                })
+
+                promise.then(value => {
+                    // then delete folder and send results
+                    Folder.deleteOne({_id, ownerId}, (err2) => DefaultSimpleResponseHandler(err2, res));
+                }).catch(reason => {
+                    DefaultSimpleResponseHandler(reason, res)
+                })
+
+            }
+
+
+        })
+
+
     }
 }
 

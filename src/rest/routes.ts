@@ -43,6 +43,7 @@ export class RoutesClass {
         router.use('/imagefiles', Passport.isAuthenticated, express.static('images/'));
 
 
+        router.get('/words', Passport.isAuthenticated, WordsController.getAll);
         router.get('/words/:folderId', Passport.isAuthenticated, WordsController.get);
         router.post('/words/:folderId', Passport.isAuthenticated, WordsController.add);
         router.put('/words/:wordId', Passport.isAuthenticated, WordsController.update);
