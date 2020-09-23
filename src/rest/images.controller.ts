@@ -35,6 +35,10 @@ export class ImagesControllerClass {
 
         const createdDocuments: ImageDocument[] = [];
 
+        if (files.length === 0) {
+            DefaultSimpleResponseHandler(new Error('User didnt upload any pictures!'), res);
+            return;
+        }
         var saveResults = new Promise((resolve, reject) => {
             files.forEach((file: Express.Multer.File, index, array) => {
                 ImagesController.saveAndCreateImage(file, ownerId, folderId)

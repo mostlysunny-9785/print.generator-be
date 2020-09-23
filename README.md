@@ -4,6 +4,10 @@ https://github.com/microsoft/TypeScript-Node-Starter/
   - need to update bcrypt
   - tweak bcrypt
   - change serializeUser to not accept false as answer
+  
+https://stackoverflow.com/questions/58408753/svg-as-svgs-image-tag-not-working-while-using-with-sharp
+https://coderrocketfuel.com/article/convert-svg-to-png-using-node-js-and-sharp
+[Density checkup](https://github.com/lovell/sharp/issues/729)
 
 ## Getting started
 
