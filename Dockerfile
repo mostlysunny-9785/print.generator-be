@@ -14,6 +14,9 @@ RUN npm install
 COPY . .
 
 RUN npm run build
+RUN mkdir -p images
+RUN mkdir -p generated/svg
+RUN mkdir -p generated/thumb
 
 EXPOSE 8080
 CMD [ "npm", "start" ]

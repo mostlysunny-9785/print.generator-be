@@ -10,7 +10,7 @@ import multer from "multer";
 import {WordsController} from "./words.controller";
 import {FoldersController} from "./folders.controller";
 import {ToolController} from "./tool.controller";
-import {IMAGE_FOLDER} from "../util/constants";
+import {IMAGE_FOLDER, RESULTS_FOLDER} from "../util/constants";
 
 
 export class RoutesClass {
@@ -52,7 +52,8 @@ export class RoutesClass {
         router.delete('/words/:wordId', Passport.isAuthenticated, WordsController.delete);
 
         router.post('/tool', Passport.isAuthenticated, ToolController.add);
-        router.get('/tool/list', Passport.isAuthenticated, ToolController.list);
+        router.get( '/tool/list', Passport.isAuthenticated, ToolController.list);
+        router.use(       '/tool/results', Passport.isAuthenticated, express.static(RESULTS_FOLDER + '/'));
 
         router.get( '/users', Passport.isAuthenticated, UsersController.list);
         router.get( '/user/:id', Passport.isAuthenticated, UsersController.get);

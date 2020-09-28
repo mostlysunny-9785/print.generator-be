@@ -16,3 +16,7 @@ if (!Array.prototype.hasOwnProperty("last")) {
         }
     });
 }
+
+export const parseHrtimeToSeconds = (hrtime: [number, number]): number => {
+    return (hrtime[0] + (hrtime[1] / 1e9));
+}

@@ -5,16 +5,19 @@ import logger from "../util/logger";
 import {DefaultResponseHandler, DefaultSimpleResponseHandler} from "./default.controller";
 import {Image, ImageDocument} from "../model/image.model";
 import {Generated, GeneratedDocument} from "../model/generated.model";
-import sharp from "sharp";
+import sharp, {OutputInfo} from "sharp";
 import * as fs from "fs";
 import {js2xml, xml2js} from "xml-js";
 import {flattenSVG} from "../util/flattenSvg";
-import {IMAGE_FOLDER} from "../util/constants";
-import {mm2pix} from "../util/helpers";
+import {IMAGE_FOLDER, RESULTS_FOLDER} from "../util/constants";
+import {mm2pix, parseHrtimeToSeconds} from "../util/helpers";
+import hasha from "hasha";
+import {Folder} from "../model/folder.model";
 
 export class ToolControllerClass {
 
-    add(req: Request, res: Response){
+    public add(req: Request, res: Response){
+        const stopwatch = process.hrtime();
         let user = (req.user as UserDocument)._id;
         let body = req.body;
         let svg = Buffer.from(body.svg, 'base64').toString('UTF-8'); // Ta-da
@@ -52,40 +55,17 @@ export class ToolControllerClass {
             }
         })
         const serializedSvg = js2xml(obj);
+        const hash = hasha(svg, {algorithm: 'md5'});
 
-        fs.writeFile('generated/my.svg', serializedSvg, err => {
-            if (err) {logger.error('Cant write file ' + err.message); return;}
+        const doc = ToolController.convertSvgToPng(serializedSvg, hash, user, stopwatch);
 
-            sharp('generated/my.svg',{
-                density: 300
-            })
-                .png()
-                .toFile("new-file.png")
-                .then(function(info) {
-                    console.log(info)
-                })
-                .catch(function(err) {
-                    console.log({err})
-                })
-
+        doc.then((document: GeneratedDocument) => {
+            // @ts-ignore
+            DefaultResponseHandler(null, document, res);
+        }).catch(reason => {
+            DefaultSimpleResponseHandler(new Error(reason), res);
         })
 
-
-
-
-
-        sharp('generated/my_3.svg')
-            .png()
-            .toFile("new-file2.png")
-            .then(function(info) {
-                console.log(info)
-            })
-            .catch(function(err) {
-                console.log({err})
-            })
-
-        const errr: any = null;
-        DefaultResponseHandler(errr, {msg: 'you are fine'}, res);
 
     }
 
@@ -96,6 +76,74 @@ export class ToolControllerClass {
             .sort({createdAt: -1})
             .exec( (error, images: GeneratedDocument[]) => DefaultResponseHandler(error, images, res));
     }
+
+
+
+
+
+
+
+    convertSvgToPng(serializedSvg: string, hash: string, user: string, stopwatch: any): Promise<GeneratedDocument> {
+        const svgFilename = "/svg/" + hash + ".svg";
+        const pngFilename = "/" + hash + ".png";
+        const smallPngFilename = "/thumb/" + hash + ".png";
+
+
+        return new Promise((resolve, reject) => {
+            fs.writeFile(RESULTS_FOLDER + svgFilename, serializedSvg, err => {
+                if (err) {
+                    reject('Cant write file ' + err?.message);
+                }
+
+                sharp(RESULTS_FOLDER + svgFilename,{
+                    density: 300
+                })
+                    .png()
+                    .toFile(RESULTS_FOLDER + pngFilename)
+                    .then((bigPng: OutputInfo) => {
+
+                        // create thumbnail
+                        sharp(RESULTS_FOLDER + pngFilename)
+                            .resize({width: 300})
+                            .toFile(RESULTS_FOLDER + smallPngFilename)
+                            .then(smallPng => {
+                                const newGenerated = {
+                                    id: hash,
+                                    title: hash,
+                                    previewFilename: "/tool/results" + smallPngFilename,
+                                    filename: "/tool/results" + pngFilename,
+                                    svgFilename: "/tool/results" + svgFilename,
+                                    width: bigPng.width,
+                                    height: bigPng.height,
+                                    fileSize: bigPng.size,
+                                    generationTime: parseHrtimeToSeconds(process.hrtime(stopwatch)),
+                                    ownerId: user
+                                } as GeneratedDocument;
+
+
+                                const generated = new Generated(newGenerated);
+                                generated.save((err, product: GeneratedDocument) => {
+                                    if (err) {
+                                        reject('Cant save to mongo ' + err?.message);
+                                    } else {
+                                        resolve(product);
+                                    }
+                                });
+
+                            }).catch(reason => {
+                                reject('Cant create thumbnail :( ' + reason?.message);
+                        });
+
+
+
+                    })
+                    .catch((err) => {
+                        reject('Cant convert file from SVG ' + err?.message);
+                    })
+            })
+        });
+    }
+
 
 }
 

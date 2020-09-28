@@ -1,5 +1,5 @@
 
 
 export const IMAGE_FOLDER = "images"
-export const SVG_FOLDER = "generated"
+export const RESULTS_FOLDER = "generated"
 
