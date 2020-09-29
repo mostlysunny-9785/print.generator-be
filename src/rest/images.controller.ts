@@ -5,7 +5,7 @@ import {UserDocument} from "../model/User";
 import * as fs from "fs";
 import logger from "../util/logger";
 import sharp, {OutputInfo} from "sharp";
-import {IMAGE_FOLDER, RESULTS_FOLDER} from "../util/constants";
+import {IMAGE_FOLDER, RESULTS_FOLDER, THUMB_WIDTH} from "../util/constants";
 import {parseHrtimeToSeconds} from "../util/helpers";
 import {Generated, GeneratedDocument} from "../model/generated.model";
 
@@ -69,7 +69,7 @@ export class ImagesControllerClass {
             imageDocuments.forEach(imageDocument => {
                 thumbnailsMultiple.push(new Promise((resolve, reject) => {
                     sharp(IMAGE_FOLDER + '/' + imageDocument.filename)
-                        .resize({width: 420})// A3 dimensions
+                        .resize({width: THUMB_WIDTH})// A3 dimensions
                         .toFile(IMAGE_FOLDER + '/thumb/' + imageDocument.filename)
                         .then((outputInfo: OutputInfo) => {
                             resolve(imageDocument);

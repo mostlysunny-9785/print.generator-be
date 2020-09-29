@@ -6,6 +6,8 @@ import {Chanel, ChanelDocument, ChanelTypes} from "../model/chanel.model";
 import logger from "../util/logger";
 import {Image, ImageDocument} from "../model/image.model";
 import {UserDocument} from "../model/User";
+import sharp, {OutputInfo} from "sharp";
+import {IMAGE_FOLDER, THUMB_WIDTH} from "../util/constants";
 
 export class ScrapControllerClass {
 
@@ -51,16 +53,25 @@ export class ScrapControllerClass {
 
 
             imageDocument.forEach(image => {
-                var newImagePath = 'images/' + image.filename;
+                var newImagePath = IMAGE_FOLDER + '/' + image.filename;
                 image.folderId = folderId; // set folder in which was image scrapped for
                 if (!fs.existsSync(newImagePath)){ // only if we do not have that image physically
                     download_image(image.remotePath, newImagePath).then((value:any) => {
                         stats.downloadedImages++;
                         image.localPath = newImagePath;
+                        // create thumbnail
+                        sharp(newImagePath)
+                            .resize({width: THUMB_WIDTH})// A3 dimensions
+                            .toFile(IMAGE_FOLDER + '/thumb/' + image.filename)
+                            .then((outputInfo: OutputInfo) => {
+
+                            }).catch(reason => {
+                                logger.error("Well arena thumbnail not created and nobody knows about it... " + reason);
+                            });
                         if (channel) {
                             this.appendImage(image, folderId, channel, stats, userId);
-
                         }
+
                     });
                 } else { // we already have that image
                     if (channel) {
