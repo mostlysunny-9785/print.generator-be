@@ -17,6 +17,12 @@ if (!Array.prototype.hasOwnProperty("last")) {
     });
 }
 
+export async function asyncForEach(array: [], callback: any) {
+    for (let index = 0; index < array.length; index++) {
+        await callback(array[index], index, array);
+    }
+}
+
 export const parseHrtimeToSeconds = (hrtime: [number, number]): number => {
     return (hrtime[0] + (hrtime[1] / 1e9));
 }

@@ -10,13 +10,13 @@ import * as fs from "fs";
 import {js2xml, xml2js} from "xml-js";
 import {flattenSVG} from "../util/flattenSvg";
 import {IMAGE_FOLDER, RESULTS_FOLDER} from "../util/constants";
-import {mm2pix, parseHrtimeToSeconds} from "../util/helpers";
+import {asyncForEach, mm2pix, parseHrtimeToSeconds} from "../util/helpers";
 import hasha from "hasha";
 import {Folder} from "../model/folder.model";
 
 export class ToolControllerClass {
 
-    public add(req: Request, res: Response){
+    public async add(req: Request, res: Response){
         const stopwatch = process.hrtime();
         let user = (req.user as UserDocument)._id;
         let body = req.body;
@@ -42,18 +42,28 @@ export class ToolControllerClass {
 
 
         // for each element prepare for parsing to PNG
-        svgElement.elements.forEach((element: any) => {
+        await asyncForEach(svgElement.elements, async (element: any) => {
             if (element.name === 'image') {
 
                 const filename = element.attributes.href.split('/').last;
                 const extension = filename.split('.').last;
                 const imageFile = fs.readFileSync(IMAGE_FOLDER + '/' + filename);
-                const imageString = new Buffer(imageFile).toString('base64'); // create base64 representation of image
+
+                const neededSize = Math.ceil(mm2pix(element.attributes.width, 300));
+                const smallerFileBuffer = await sharp(IMAGE_FOLDER + '/' + filename)
+                                        .resize({width: neededSize})
+                                        .toBuffer()
+
+                // const imageString = new Buffer(imageFile).toString('base64'); // create base64 representation of image
+                const imageString = smallerFileBuffer.toString('base64'); // create base64 representation of imageconst
 
                 element.attributes["xlink:href"] = 'data:image/' + extension + ';base64,' + imageString;
                 delete element.attributes.href;
             }
         })
+        // svgElement.elements.forEach((element: any) => {
+        //
+        // })
         const serializedSvg = js2xml(obj);
         const hash = hasha(svg, {algorithm: 'md5'});
 

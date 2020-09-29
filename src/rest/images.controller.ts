@@ -4,6 +4,10 @@ import {DefaultResponseHandler, DefaultSimpleResponseHandler} from "./default.co
 import {UserDocument} from "../model/User";
 import * as fs from "fs";
 import logger from "../util/logger";
+import sharp, {OutputInfo} from "sharp";
+import {IMAGE_FOLDER, RESULTS_FOLDER} from "../util/constants";
+import {parseHrtimeToSeconds} from "../util/helpers";
+import {Generated, GeneratedDocument} from "../model/generated.model";
 
 export class ImagesControllerClass {
     getByChanel(req: Request, res: Response) {
@@ -39,31 +43,56 @@ export class ImagesControllerClass {
             DefaultSimpleResponseHandler(new Error('User didnt upload any pictures!'), res);
             return;
         }
-        var saveResults = new Promise((resolve, reject) => {
-            files.forEach((file: Express.Multer.File, index, array) => {
+
+        var saveMultiple: Promise<ImageDocument>[] = [];
+
+
+        files.forEach((file: Express.Multer.File) => {
+            saveMultiple.push(new Promise((resolve, reject) => {
                 ImagesController.saveAndCreateImage(file, ownerId, folderId)
                     .then((createdDocument) => {
                         createdDocuments.push(createdDocument)
-                        if (index === array.length -1) resolve();
+                        resolve(createdDocument);
+                        // if (index === array.length -1) resolve(createdDocument);
                     })
                     .catch((err) => {
-                        DefaultSimpleResponseHandler(err, res);
-                        reject();
+                        reject(new Error('Cant save to mongo ' + err));
                     })
-
-
-            });
+            }))
         });
 
-        saveResults.then(() => {
+        var thumbnailsMultiple: Promise<ImageDocument>[] = [];
+        let imageDocs: ImageDocument[] = [];
+        // after all images has been sucessfully saved -> create thumbnails
+        Promise.all(saveMultiple).then((imageDocuments: ImageDocument[]) => {
+            imageDocs = imageDocuments;
+            imageDocuments.forEach(imageDocument => {
+                thumbnailsMultiple.push(new Promise((resolve, reject) => {
+                    sharp(IMAGE_FOLDER + '/' + imageDocument.filename)
+                        .resize({width: 420})// A3 dimensions
+                        .toFile(IMAGE_FOLDER + '/thumb/' + imageDocument.filename)
+                        .then((outputInfo: OutputInfo) => {
+                            resolve(imageDocument);
+                        }).catch(reason => {
+                            reject(new Error('Creating of thumbnail was unsuccessfull: ' + reason));
+                    });
+                }))
+            })
+
+            // wait for thumbnails to be created
+            Promise.all(thumbnailsMultiple).then((outputs: ImageDocument[]) => {
                 res.statusCode = 201;
-                res.json(createdDocuments);
+                res.json(outputs);
+            }).catch(reason => {
+                DefaultSimpleResponseHandler(reason, res);
             });
 
-        saveResults.catch(() => {
-                logger.error('Nothing has been saved.');
-                DefaultSimpleResponseHandler(new Error('Empty result :('), res);
-            });
+        }).catch(reason => {
+            DefaultSimpleResponseHandler(reason, res);
+        });
+
+
+
 
 
         logger.info('User just uploaded ' + files.length + ' files');
@@ -113,6 +142,10 @@ export class ImagesControllerClass {
                 });
             }
         });
+
+    }
+
+    createThumbnail() {
 
     }
 
