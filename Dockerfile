@@ -14,9 +14,8 @@ RUN npm install
 COPY . .
 
 RUN npm run build
-RUN mkdir -p images
-RUN mkdir -p generated/svg
-RUN mkdir -p generated/thumb
+
+COPY fonts/* /usr/share/fonts/truetype/arial/
 
 EXPOSE 8080
 CMD [ "npm", "start" ]
