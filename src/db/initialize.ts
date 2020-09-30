@@ -4,6 +4,8 @@ import {Chanel, ChanelDocument, ChanelTypes} from "../model/chanel.model";
 import {Image, ImageDocument} from "../model/image.model";
 import bcrypt from "bcrypt";
 import {Folder, FolderDocument, FolderType} from "../model/folder.model";
+import * as fs from "fs";
+import {IMAGE_FOLDER, RESULTS_FOLDER} from "../util/constants";
 
 
 class DbInitializedClass {
@@ -95,3 +97,9 @@ class DbInitializedClass {
 }
 
 export var DbInitialized = new DbInitializedClass();
+
+
+// initialize folders
+fs.mkdirSync(IMAGE_FOLDER + "/thumb", { recursive: true });
+fs.mkdirSync(RESULTS_FOLDER + "/svg", { recursive: true });
+fs.mkdirSync(RESULTS_FOLDER + "/thumb", { recursive: true });

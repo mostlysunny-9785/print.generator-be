@@ -46,18 +46,18 @@ export class ToolControllerClass {
             if (element.name === 'image') {
 
                 const filename = element.attributes.href.split('/').last;
-                const extension = filename.split('.').last;
+                let   extension = filename.split('.').last;
                 const imageFile = fs.readFileSync(IMAGE_FOLDER + '/' + filename);
 
                 const neededSize = Math.ceil(mm2pix(element.attributes.width, 300));
                 const smallerFileBuffer = await sharp(IMAGE_FOLDER + '/' + filename)
                                         .resize({width: neededSize})
-                                        .toBuffer()
+                                        .toBuffer({resolveWithObject: true})
 
                 // const imageString = new Buffer(imageFile).toString('base64'); // create base64 representation of image
-                const imageString = smallerFileBuffer.toString('base64'); // create base64 representation of imageconst
-
-                element.attributes["xlink:href"] = 'data:image/' + extension + ';base64,' + imageString;
+                const imageString = smallerFileBuffer.data.toString('base64'); // create base64 representation of imageconst
+                const imageFormat = smallerFileBuffer.info.format;
+                element.attributes["xlink:href"] = 'data:image/' + imageFormat + ';base64,' + imageString;
                 delete element.attributes.href;
             }
         })
@@ -70,6 +70,7 @@ export class ToolControllerClass {
         const doc = ToolController.convertSvgToPng(serializedSvg, hash, user, stopwatch);
 
         doc.then((document: GeneratedDocument) => {
+            logger.info("Created image in " + parseHrtimeToSeconds(process.hrtime(stopwatch)) + " s, ");
             // @ts-ignore
             DefaultResponseHandler(null, document, res);
         }).catch(reason => {

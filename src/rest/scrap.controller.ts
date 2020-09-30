@@ -8,6 +8,14 @@ import {Image, ImageDocument} from "../model/image.model";
 import {UserDocument} from "../model/User";
 import sharp, {OutputInfo} from "sharp";
 import {IMAGE_FOLDER, THUMB_WIDTH} from "../util/constants";
+import {DefaultSimpleResponseHandler} from "./default.controller";
+
+interface Stats {
+    downloadedImages: number,
+    appendedImages: number,
+    overallDownload: number,
+    thumbsGenerated: number
+}
 
 export class ScrapControllerClass {
 
@@ -42,51 +50,35 @@ export class ScrapControllerClass {
             channel._id = promise._id;
         }
 
-        ArenaScrapper.scrapImages(channelToLoad, 1, 1000, channel._id).subscribe((imageDocument: ImageDocument[]) => {
-            // console.log({value});
-            var newImages: ImageDocument[] = [];
-            var stats = {
+        ArenaScrapper.scrapImages(channelToLoad, 1, 100, channel._id).subscribe((imageDocument: ImageDocument[]) => {
+            var stats: Stats = {
                 downloadedImages: 0,
                 appendedImages: 0,
-                overallDownload: newImages.length
+                overallDownload: 0,
+                thumbsGenerated: 0
             };
 
-
+            const downloadedImages: Promise<ImageDocument>[] = [];
             imageDocument.forEach(image => {
-                var newImagePath = IMAGE_FOLDER + '/' + image.filename;
-                image.folderId = folderId; // set folder in which was image scrapped for
-                if (!fs.existsSync(newImagePath)){ // only if we do not have that image physically
-                    download_image(image.remotePath, newImagePath).then((value:any) => {
-                        stats.downloadedImages++;
-                        image.localPath = newImagePath;
-                        // create thumbnail
-                        sharp(newImagePath)
-                            .resize({width: THUMB_WIDTH})// A3 dimensions
-                            .toFile(IMAGE_FOLDER + '/thumb/' + image.filename)
-                            .then((outputInfo: OutputInfo) => {
-
-                            }).catch(reason => {
-                                logger.error("Well arena thumbnail not created and nobody knows about it... " + reason);
-                            });
-                        if (channel) {
-                            this.appendImage(image, folderId, channel, stats, userId);
-                        }
-
-                    });
-                } else { // we already have that image
-                    if (channel) {
-                        this.appendImage(image, folderId, channel, stats, userId);
-                    }
+                if (channel) {
+                    downloadedImages.push(ScrapController.downloadAndThumbnailImage(image, folderId, channel, stats, userId));
                 }
+
             });
 
-            res.send(newImages.length + ' images scrapped, loaded ' + imageDocument.length + " blocks");
-            logger.info("Scrap result", stats);
+            Promise.all(downloadedImages).then((imageDocumnents: ImageDocument[]) => {
+                res.send(stats.overallDownload + ' images downloaded, saved ' + imageDocumnents.length + " images");
+                logger.info("Scrap result ", stats);
+            }).catch(reason => {
+                DefaultSimpleResponseHandler(reason, res);
+            })
+
+
 
         });
     };
 
-    public async appendImage(image: ImageDocument, folderId: string, channel: ChanelDocument, stats: any, ownerId: string) {
+    public async appendImageToChannel(image: ImageDocument, folderId: string, channel: ChanelDocument, stats: Stats, ownerId: string) {
         // if we cant find that image add it (upsert)
         Image.findOneAndUpdate({remotePath: image.remotePath, ownerId, folderId}, image, {upsert: true}, (err, image: ImageDocument | null, res: any) => {
             if (err) {
@@ -103,6 +95,57 @@ export class ScrapControllerClass {
 
         });
 
+    }
+
+    public async downloadAndThumbnailImage(image: ImageDocument, folderId: string, channel: ChanelDocument, stats: Stats, userId: string): Promise<ImageDocument> {
+        return new Promise<ImageDocument>((resolve, reject) => {
+            var newImagePath = IMAGE_FOLDER + '/' + image.filename;
+            image.folderId = folderId; // set folder in which was image scrapped for
+            if (!fs.existsSync(newImagePath)){ // only if we do not have that image physically
+                download_image(image.remotePath, newImagePath).then((value:any) => {
+                    stats.downloadedImages++;
+                    image.localPath = newImagePath;
+                    // create thumbnail
+                    ScrapController.createThumb(image.filename, stats).then(result => {
+                        this.appendImageToChannel(image, folderId, channel, stats, userId);
+                        resolve(image);
+                    }).catch(reason => {
+                        reject(reason);
+                    })
+                });
+            } else { // we already have that image, but do we have thumbnail?
+                ScrapController.createThumb(image.filename, stats).then(value => {
+                    this.appendImageToChannel(image, folderId, channel, stats, userId);
+                    resolve(image);
+                }).catch(reason => {
+                    reject(reason);
+                })
+            }
+
+        });
+    }
+
+    public async createThumb(imageFilename: string, stats: Stats): Promise<boolean> {
+        const filename = IMAGE_FOLDER + '/' + imageFilename;
+        const thumbFilename = IMAGE_FOLDER + '/thumb/' + imageFilename;
+
+
+        return new Promise((resolve, reject) => {
+            // create only if thumb filename exists
+            if (!fs.existsSync(thumbFilename)) {
+                sharp(filename)
+                    .resize({width: THUMB_WIDTH})// A3 dimensions
+                    .toFile(thumbFilename)
+                    .then((outputInfo: OutputInfo) => {
+                        stats.thumbsGenerated++;
+                        resolve(true);
+                    }).catch(reason => {
+                        reject(new Error("Well arena thumbnail not created... " + reason));
+                });
+            } else {
+                resolve(true);
+            }
+        });
     }
 
 }

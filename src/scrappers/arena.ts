@@ -31,13 +31,12 @@ export class ArenaClass {
 
                     subscriber.next(images);
                     subscriber.complete();
-                })
-                .catch((err: any) => console.log(err));
+                }).catch((err: any) => console.log(err));
         });
 
     }
 
-    chanelInfo(chanel: string) {
+    channelInfo(chanel: string) {
         return new Observable<ImageDocument[]>(subscriber => {
 
         });
