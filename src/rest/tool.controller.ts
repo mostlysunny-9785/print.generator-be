@@ -1,24 +1,24 @@
 import {Request, Response} from "express";
 import {UserDocument} from "../model/User";
-import {WordDocument, Word} from "../model/word.model";
 import logger from "../util/logger";
 import {DefaultResponseHandler, DefaultSimpleResponseHandler} from "./default.controller";
-import {Image, ImageDocument} from "../model/image.model";
 import {Generated, GeneratedDocument} from "../model/generated.model";
 import sharp, {OutputInfo} from "sharp";
 import * as fs from "fs";
 import {js2xml, xml2js} from "xml-js";
-import {flattenSVG} from "../util/flattenSvg";
 import {IMAGE_FOLDER, RESULTS_FOLDER} from "../util/constants";
 import {asyncForEach, mm2pix, parseHrtimeToSeconds} from "../util/helpers";
 import hasha from "hasha";
-import {Folder} from "../model/folder.model";
+import {PrintColors} from "../model/userSettings.model";
 
 export class ToolControllerClass {
 
     public async add(req: Request, res: Response){
         const stopwatch = process.hrtime();
+
         let user = (req.user as UserDocument)._id;
+        let userSettings = (req.user as UserDocument).settings;
+        const greyscale: boolean = userSettings.printColor === PrintColors.BW;
         let body = req.body;
         let svg = Buffer.from(body.svg, 'base64').toString('UTF-8'); // Ta-da
 
@@ -49,6 +49,7 @@ export class ToolControllerClass {
                 const neededSize = Math.ceil(mm2pix(element.attributes.width, 300));
                 const smallerFileBuffer = await sharp(IMAGE_FOLDER + '/' + filename)
                                         .resize({width: neededSize})
+                                        .greyscale(greyscale)
                                         .toBuffer({resolveWithObject: true})
 
                 // const imageString = new Buffer(imageFile).toString('base64'); // create base64 representation of image
