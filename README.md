@@ -5,10 +5,11 @@ https://github.com/microsoft/TypeScript-Node-Starter/
   - tweak bcrypt
   - change serializeUser to not accept false as answer
   
-https://stackoverflow.com/questions/58408753/svg-as-svgs-image-tag-not-working-while-using-with-sharp
-https://coderrocketfuel.com/article/convert-svg-to-png-using-node-js-and-sharp
-[Density checkup](https://github.com/lovell/sharp/issues/729)
-[fonts in docker](https://medium.com/@aungmt/image-manipulation-in-nodejs-bdc31da22d08)
+
+  - [sharp](https://stackoverflow.com/questions/58408753/svg-as-svgs-image-tag-not-working-while-using-with-sharp)
+  - [sharp2](https://coderrocketfuel.com/article/convert-svg-to-png-using-node-js-and-sharp)
+  - [Density checkup](https://github.com/lovell/sharp/issues/729)
+  - [fonts in docker](https://medium.com/@aungmt/image-manipulation-in-nodejs-bdc31da22d08)
 
 ## Getting started
 

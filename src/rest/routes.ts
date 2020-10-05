@@ -59,6 +59,7 @@ export class RoutesClass {
         router.get( '/user/:id', Passport.isAuthenticated, UsersController.get);
         router.post('/user', Passport.isAuthenticated, UsersController.create);
         router.put( '/user', Passport.isAuthenticated, UsersController.update);
+        router.put( '/user/settings', Passport.isAuthenticated, UsersController.updateSettings);
 
         router.post('/login', UsersController.postLogin);
         router.get( '/session', Passport.isAuthenticated, UsersController.session);

@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import mongoose from "mongoose";
 import logger from "../util/logger";
+import {UserSettingsModel} from "./userSettings.model";
 
 export type UserDocument = mongoose.Document & {
     email: string;
@@ -11,6 +12,9 @@ export type UserDocument = mongoose.Document & {
 
     facebook: string;
     tokens: AuthToken[];
+
+    settings: UserSettingsModel;
+
 
     profile: {
         name: string;
@@ -41,6 +45,8 @@ const userSchema = new mongoose.Schema({
     twitter: String,
     google: String,
     tokens: Array,
+
+    settings: Object,
 
     profile: {
         name: String,

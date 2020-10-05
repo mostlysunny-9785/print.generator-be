@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import {Folder, FolderDocument, FolderType} from "../model/folder.model";
 import * as fs from "fs";
 import {IMAGE_FOLDER, RESULTS_FOLDER} from "../util/constants";
+import {DefaultUserSettingsModel, UserSettingsModel} from "../model/userSettings.model";
 
 
 class DbInitializedClass {
@@ -13,13 +14,16 @@ class DbInitializedClass {
     initDbWhenEmpty() {
         User.insertMany([{
             email: "honza",
-            password: "$2b$10$opt8/gzBpfJa.7Lj3i1Gp.LynoNrZTCBsltHbtUxqT.DF1xNIW8i2"
+            password: "$2b$10$opt8/gzBpfJa.7Lj3i1Gp.LynoNrZTCBsltHbtUxqT.DF1xNIW8i2",
+            settings: DefaultUserSettingsModel
         } as UserDocument, {
             email: "kuba",
-            password: "$2b$10$opt8/gzBpfJa.7Lj3i1Gp.LynoNrZTCBsltHbtUxqT.DF1xNIW8i2"
+            password: "$2b$10$opt8/gzBpfJa.7Lj3i1Gp.LynoNrZTCBsltHbtUxqT.DF1xNIW8i2",
+            settings: DefaultUserSettingsModel
         } as UserDocument, {
             email: "nobody #10156",
-            password: "$2b$10$ZGR13jlz8A9.ylr2inJdYu7yduc7w5q7eGPzsewAAdBjcSYEjEsNO"
+            password: "$2b$10$ZGR13jlz8A9.ylr2inJdYu7yduc7w5q7eGPzsewAAdBjcSYEjEsNO",
+            settings: DefaultUserSettingsModel
         } as UserDocument
         ], (error: Error, docsInserted: UserDocument[]) => {
             if (error){

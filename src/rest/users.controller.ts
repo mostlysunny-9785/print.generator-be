@@ -3,7 +3,9 @@ import {DB} from "../db/db";
 import { check, sanitize, validationResult } from "express-validator";
 import passport from "passport";
 import {IVerifyOptions} from "passport-local";
-import {UserDocument} from "../model/User";
+import {User, UserDocument} from "../model/User";
+import {Word} from "../model/word.model";
+import {DefaultSimpleResponseHandler} from "./default.controller";
 
 export class UsersControllerClass {
     public async session(req: Request, res: Response, next: NextFunction) {
@@ -38,6 +40,7 @@ export class UsersControllerClass {
                 if (err) {
                     return next(err);
                 }
+                delete user.password; // remove password, UI does not need that
                 res.status(200).send(user);
                 // @ts-ignore
                 // res.redirect(req.session.returnTo || "/");
@@ -97,6 +100,24 @@ export class UsersControllerClass {
 
     update(req: Request, res: Response){
         res.status(501).send("Unimplemented");
+    }
+
+    updateSettings(req: Request, res: Response) {
+        let ownerId = (req.user as UserDocument)._id;
+        let settings = req.body.content;
+
+        User.findOneAndUpdate({_id: ownerId}, {settings}, (err, user) => {
+            if (err) {
+                DefaultSimpleResponseHandler(new Error('Error during settings update.'), res);
+            } else {
+                if (!user) {
+                    DefaultSimpleResponseHandler(new Error('Cant find that user.'), res);
+                } else {
+                    res.status(200).json(user.settings);
+                }
+
+            }
+        })
     }
 }
 

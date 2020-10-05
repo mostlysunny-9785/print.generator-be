@@ -36,11 +36,6 @@ export class ArenaClass {
 
     }
 
-    channelInfo(chanel: string) {
-        return new Observable<ImageDocument[]>(subscriber => {
-
-        });
-    }
 }
 
 export var ArenaScrapper = new ArenaClass();

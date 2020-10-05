@@ -25,7 +25,6 @@ export class ToolControllerClass {
         // let s = svg.replace(/\/api\/imagefiles\//g, 'images/');
         // s = s.replace(/ href="/g, '\n' + ' xlink:href="');
 
-
         // replace image paths with base64 image
         const obj = xml2js(svg);
         const svgElement = obj.elements[0];
@@ -38,8 +37,6 @@ export class ToolControllerClass {
         svgElement.attributes.height = heightPx;
         svgElement.attributes.x = 0;
         svgElement.attributes.y = 0;
-
-
 
         // for each element prepare for parsing to PNG
         await asyncForEach(svgElement.elements, async (element: any) => {
@@ -61,9 +58,7 @@ export class ToolControllerClass {
                 delete element.attributes.href;
             }
         })
-        // svgElement.elements.forEach((element: any) => {
-        //
-        // })
+
         const serializedSvg = js2xml(obj);
         const hash = hasha(svg, {algorithm: 'md5'});
 
