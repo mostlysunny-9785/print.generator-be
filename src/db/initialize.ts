@@ -85,7 +85,7 @@ class DbInitializedClass {
         });
     }
 
-    private initFolders(ownerId: string) {
+    public initFolders(ownerId: string) {
         Folder.insertMany([{
             id: 1,
             type: FolderType.IMAGE,

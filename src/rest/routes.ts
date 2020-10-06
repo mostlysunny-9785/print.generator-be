@@ -55,11 +55,12 @@ export class RoutesClass {
         router.get( '/tool/list', Passport.isAuthenticated, ToolController.list);
         router.use(       '/tool/results', Passport.isAuthenticated, express.static(RESULTS_FOLDER + '/'));
 
-        router.get( '/users', Passport.isAuthenticated, UsersController.list);
-        router.get( '/user/:id', Passport.isAuthenticated, UsersController.get);
-        router.post('/user', Passport.isAuthenticated, UsersController.create);
-        router.put( '/user', Passport.isAuthenticated, UsersController.update);
-        router.put( '/user/settings', Passport.isAuthenticated, UsersController.updateSettings);
+        router.get(  '/users', Passport.isAuthenticated, UsersController.list);
+        router.get(  '/user/:id', Passport.isAuthenticated, UsersController.get);
+        router.post( '/user', Passport.isAuthenticated, UsersController.create);
+        router.put(  '/user', Passport.isAuthenticated, UsersController.update);
+        router.put(  '/user/settings', Passport.isAuthenticated, UsersController.updateSettings);
+        router.post( '/user/guest', UsersController.getGuestId);
 
         router.post('/login', UsersController.postLogin);
         router.get( '/session', Passport.isAuthenticated, UsersController.session);

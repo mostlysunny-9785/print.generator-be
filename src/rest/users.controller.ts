@@ -6,6 +6,10 @@ import {IVerifyOptions} from "passport-local";
 import {User, UserDocument} from "../model/User";
 import {Word} from "../model/word.model";
 import {DefaultSimpleResponseHandler} from "./default.controller";
+import {Guest, GuestDocument} from "../model/guest.model";
+import logger from "../util/logger";
+import {DefaultUserSettingsModel} from "../model/userSettings.model";
+import {DbInitialized} from "../db/initialize";
 
 export class UsersControllerClass {
     public async session(req: Request, res: Response, next: NextFunction) {
@@ -117,6 +121,45 @@ export class UsersControllerClass {
                 }
 
             }
+        })
+    }
+
+    getGuestId(req: Request, res: Response) {
+        Guest.find()
+            .sort({$natural: -1})
+            .limit(1)
+            .then((guest: GuestDocument[]) => {
+                let newGuest: any;
+                if (guest && guest.length > 0) { // we found last guest try to increase and create
+                    newGuest = {id: guest[0].id + 1};
+                } else { // there are no guests yet
+                    newGuest = {id: 0};
+                }
+
+                const dbGuest = new Guest(newGuest);
+                dbGuest.save((err, product) => {
+                    if (err) {
+                        DefaultSimpleResponseHandler(new Error('CantSave to mongo: ' + err), res);
+                    } else {
+                        // so now we have a new guest! Thats great, create also user for this thingy
+                        User.create({
+                            email: "anonymous #" + product.id,
+                            password: "dummy", // TODO: dummy
+                            settings: DefaultUserSettingsModel
+                        } as UserDocument, (error: Error, user: UserDocument) => {
+                            if (error) {
+                                logger.error(error);
+                            } else {
+                                DbInitialized.initFolders(user._id);
+                                res.statusCode = 201;
+                                res.json(product);
+                            }
+                        });
+                    }
+                });
+
+            }).catch((err) => {
+                DefaultSimpleResponseHandler(new Error('Mongo error :( ' + err), res);
         })
     }
 }
