@@ -48,6 +48,8 @@ export class ToolControllerClass {
 
                 const neededSize = Math.ceil(mm2pix(element.attributes.width, 300));
                 const smallerFileBuffer = await sharp(IMAGE_FOLDER + '/' + filename)
+                                        .rotate()
+                                        .withMetadata()
                                         .resize({width: neededSize})
                                         .greyscale(greyscale)
                                         .toBuffer({resolveWithObject: true})

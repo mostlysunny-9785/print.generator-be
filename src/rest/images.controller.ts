@@ -69,6 +69,8 @@ export class ImagesControllerClass {
             imageDocuments.forEach(imageDocument => {
                 thumbnailsMultiple.push(new Promise((resolve, reject) => {
                     sharp(IMAGE_FOLDER + '/' + imageDocument.filename)
+                        .rotate()
+                        .withMetadata()
                         .resize({width: THUMB_WIDTH})// A3 dimensions
                         .toFile(IMAGE_FOLDER + '/thumb/' + imageDocument.filename)
                         .then((outputInfo: OutputInfo) => {
