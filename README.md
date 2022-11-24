@@ -1,4 +1,4 @@
-# YACYAG backend
+# print.generator backend
 
 ## How to run
 - start mongo in docker by running ```./runMongo```
